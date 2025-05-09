@@ -116,6 +116,11 @@ DB_HOST = postgreSQL host (localhost:5432)
 DB_NAME = postgreSQL db name
 DB_USER = postgreSQL user
 DB_PASS = postgreSQL password
+
+Для получения API https://openweathermap.org/
+Требуется зарегистрироваться на сайте и далее сверху
+справа нажать на свой логин и выбрать My API keys
+Если ключа нет, то сгенерировать его.
 ```
 
 ## Creating systemd units
