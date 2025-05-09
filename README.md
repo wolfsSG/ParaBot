@@ -16,7 +16,6 @@
 ```
 
 ## Installation
-Clone this project and create a virtual environment in the project directory.
 Updating packages
 ```commandline
 sudo apt update && sudo apt upgrade -y
@@ -25,7 +24,7 @@ libbz2-dev libreadline-dev libsqlite3-dev llvm \
 libncursesw5-dev xz-utils tk-dev libxml2-dev libxmlsec1-dev libffi-dev liblzma-dev
 ```
 
-Installing pyenv
+## Installing pyenv
 ```commandline
 curl https://pyenv.run | bash
 echo 'export PYENV_ROOT="$HOME/.pyenv"' >> ~/.bashrc
@@ -35,18 +34,18 @@ source ~/.bashrc
 sudo reboot
 ```
 
-Installing Python 3.10 via pyenv
+## Installing Python 3.10 via pyenv
 ```commandline
 pyenv install 3.10.13  # You can choose another version 3.10+
 pyenv global 3.10.13
 ```
 
-Examination:
+## Examination:
 ```commandline
 python --version # Must be Python 3.10.x
 ```
 
-Installing ParaBot
+## Installing ParaBot
 Creating a virtual environment
 ```commandline
 cd ~
@@ -54,13 +53,13 @@ python -m venv ~/parabot_venv
 source ~/parabot_venv/bin/activate
 ```
 
-Cloning a repository
+## Cloning a repository
 ```commandline
 git clone https://github.com/YaraKoba/ParaBot.git
 cd ParaBot
 ```
 
-Installing dependencies
+## Installing dependencies
 ```commandline
 pip install --upgrade pip
 pip install -r requirements.txt
@@ -68,7 +67,7 @@ sudo apt install libpq-dev
 pip install psycopg2-binary
 ```
 
-Setting up a database
+## Setting up a database
 ```commandline
 sudo apt install postgresql postgresql-contrib
 sudo -u postgres psql -c "CREATE DATABASE parabot_db;"
@@ -77,14 +76,13 @@ sudo -u postgres psql -c "GRANT ALL PRIVILEGES ON DATABASE parabot_db TO parabot
 ```
 When initializing the database, you will need to specify localhost:5432 in the DB_HOST variable.
 
-install requirements
-
+## install requirements
 ```commandline
 @@ -112,3 +166,79 @@ DB_PASS = postgreSQL password
 make run_bot
 ```
 
-Creating systemd units
+## Creating systemd units
 Let's create two separate units - for the bot and the Django server.
 ```commandline
 sudo nano /etc/systemd/system/parabot.service
@@ -131,14 +129,14 @@ StandardError=file:/var/log/parabot/django_error.log
 WantedBy=multi-user.target
 ```
 
-Setting up rights and logs
+## Setting up rights and logs
 ```commandline
 sudo mkdir -p /var/log/parabot
 sudo chown your_user:your_user /var/log/parabot
 sudo chmod 755 /var/log/parabot
 ```
 
-Activation of services
+## Activation of services
 ```commandline
 sudo systemctl daemon-reload
 sudo systemctl enable parabot.service
@@ -147,7 +145,7 @@ sudo systemctl start parabot.service
 sudo systemctl start parabot-django.service
 ```
 
-Проверка работы
+## Проверка работы
 ```commandline
 sudo systemctl status parabot.service
 sudo systemctl status parabot-django.service
