@@ -2,7 +2,7 @@
 
 
 # Parabot
-<b> link to bot: https://t.me/para_kzn_bot </b>
+<b> link to bot: https://t.me/kem_42_para_bot </b>
 
 ## About: 
 This project was created for the paragliding community.
