@@ -117,11 +117,6 @@ DB_NAME = postgreSQL db name
 DB_USER = postgreSQL user
 DB_PASS = postgreSQL password
 
-## Run telegram bot
-```commandline
-make run_bot
-```
-
 ## Creating systemd units
 Let's create two separate units - for the bot and the Django server.
 ```commandline
