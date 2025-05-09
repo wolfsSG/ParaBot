@@ -1,55 +1,73 @@
-
 from suport_fl.suport import *
 import re
+import logging
+from typing import List, Union, Dict, Any
 
+def split_long_message(text, max_length=4000):
+    if len(text) <= max_length:
+        return [text]
+    parts = []
+    while len(text) > 0:
+        part = text[:max_length]
+        last_newline = part.rfind('\n')
+        if last_newline > 0:
+            part = part[:last_newline]
+        parts.append(part)
+        text = text[len(part):].lstrip()
+    return parts
 
 def header_mess(message):
-    return (f'<b>Привет, {message.from_user.first_name}!</b>\n'
-            f'Бот позволяет узнать где и когда <b>можно полетать</b>.\n'
-            f'Каждый день вы будете получать уведомления о погоде,\n'
+    text = (f'<b>Привет, {message.from_user.first_name}!</b>\n'
+            f'Бот следит за прогнозом погоды и показывает наиболее\n'
+            f'подходящие под погодные условия летные места.\n'
+            f'Упрощает мониторинг прогноза погоды и выбор места для полетов.\n'
+            f'При желании, каждый день в 11:00 по местному времени\n'
+            f'вам будет приходить уведомление о летных местах на 5 дней,\n'
+            f'города, которого вы выберете.\n\n'
+            f'<b>Как им пользоваться?!</b>\n'
+            f'1. Выберите город, где хочется полетать.\n'
+            f'2. Выберите дату.\n'
+            f'3. Отчет вам покажет место, время и благоприятность\n'
+            f'условий в процентах, учитывая направление, силу\n'
+            f'ветра и вероятность осадков.\n\n'
+            f'Также бот удобен тем, что в нем хранится\n'
+            f'информация о летных местах и, приезжая в незнакомое место,\n'
+            f'можно сразу узнать какие горки есть поблизости,\n'
+            f'ведь добавленные места будут доступны всем.\n\n'
+            f'<b>ВАЖНО!!!</b> Бот всего лишь упрощает поиск летной погоды,\n'
+            f'а не заменяет его. Обязательно перепроверяйте его прогнозы!!!\n'
+            f'Внизу каждого отчета есть ссылка на подробный прогноз.\n\n'
+            f'<b>Как добавить новые летные места?</b>\n'
+            f'Добавлять горки можно через админку,\n'
+            f'напишите мне @wolfs_SG и я дам вам доступ к админ-панели.\n\n'
             f'<b>Команды:</b>\n'
-            f'/days - обновить дни\n'
-            f'/city - выбрать другой город\n'
-            f'/get_spot - Посмотреть добавленные горки\n'
-            f'/stop - <b>отключить</b> уведомления\n'
-            f'/go - <b>включить</b> уведомления\n'
-            f'/help - получить доп. информацию\n\n'
-            f'<b>Обозначения в прогнозе:</b>\n'
-            f'Ч - Время в часах\n'
-            f'В - Ср. скорость ветра в м/с\n'
-            f'Пор - Порывы ветра в м/с\n'
-            f'Нап - Направление ветра в градусах\n'
-            f'% - Оценка погодных условий (Сила и Направление ветра), чем больше процентов, тем лучше условия\n\n'
-            f'<b>Выберете город и нажмите на дату, чтобы узнать где полетать</b> &#128526;\n'
-            f'p.s. Если вашего города нет в списке, напишите мне @Kobyakov_Yaroslav')
+            f'/start - это меню\n'
+            f'/help - получить доп. информацию по командам\n\n'
+            f'p.s. Этот бот написан пилотом из Казани Кобяковым Ярославом\n'
+            f'Адаптирован, переделан и частично переписан Лучшевым Сергеем')
+    return text
 
 
 def help_mess():
-    return (f'Бот позволяет узнать где и когда <b>можно полетать</b>.\n'
-            f'Каждый день вы будете получать уведомления о погоде,\n'
+    return (f'Бот позволяет узнать где и когда <b>можно полетать</b>.\n\n'
             f'<b>Команды:</b>\n'
-            f'/days - обновить дни\n'
+            f'/start - главное меню\n'
+            f'/help - это меню\n\n'
             f'/city - выбрать другой город\n'
             f'/get_spot - Посмотреть добавленные горки\n'
-            f'/stop - <b>отключить</b> уведомления\n'
+            f'/days - обновить дни\n\n'
             f'/go - <b>включить</b> уведомления\n'
-            f'/help - получить доп. информацию\n\n'
+            f'/stop - <b>отключить</b> уведомления\n\n'
             f'<b>Обозначения в прогнозе:</b>\n'
             f'Ч - Время в часах\n'
             f'В - Ср. скорость ветра в м/с\n'
             f'Пор - Порывы ветра в м/с\n'
             f'Нап - Направление ветра в градусах\n'
             f'% - Оценка погодных условий (Сила и Направление ветра), чем больше процентов тем лучше условия\n\n'
-            f'Данный бот был создан пилотом из Казани в 2022 году.\n\n'
-            f'Дорогой пользователь, \n'
-            f'Я хотел бы выразить свою искреннюю благодарность за то, что воспользовались моим чат-ботом. '
-            f'Надеюсь, он был вам полезен\n\n'
-            f'Бот полностью бесплатный и продолжает развиваться, если вы нашли ошибку или баг, '
-            f'пожалуйста, сообщите мне об этом @Kobyakov_Yaroslav.\n\n'
-            f'Если вы хотите добавить собственные летные места, напишите мне и я дам вам доступ '
+            f'Если вы хотите добавить собственные летные места,\n'
+            f'напишите мне @wolfs_SG и я дам вам доступ\n'
             f'к админ-панели, где можно будет добавлять свои горки.\n\n'
-            f'Побольше летных дней и удачи &#128521;\n'
-            f'Ваш Кобяков Ярослав')
+            f'Побольше летных дней и удачи &#128521;\n')
 
 
 def err_mess(err):
@@ -58,26 +76,76 @@ def err_mess(err):
            f"Error:  {err}\n"\
            f"Date:  {now.strftime('%d-%m-%Y %H:%M')}"
 
+from suport_fl.suport import *
+import re
+import logging
+from typing import List, Union, Dict, Any
 
-def meteo_message(all_spot, spots, d):
-    str_post = ''
-    data = ''
+logger = logging.getLogger(__name__)
 
-    if type(all_spot) == dict:
-        message = amdate(d[0]) if len(d) == 1 else 'В ближайшие 5 дней'
-        str_post += f'\n--- <b>{message}</b> ---\n\n'
-        str_post += '<u><b>Летная погода не найдена</b></u> &#128530;\n\n'\
-                    f'{easy_meteo(all_spot["time"])}'
-        return str_post
+def split_long_text(text: str, max_len: int = 4000) -> List[str]:
+    """Разбивает текст на части по логическим блокам"""
+    if len(text) <= max_len:
+        return [text]
+    
+    parts = []
+    while text:
+        # Сначала пробуем разделить по двойным переносам
+        split_pos = text.rfind('\n\n', 0, max_len)
+        # Если нет - по обычным переносам
+        if split_pos == -1:
+            split_pos = text.rfind('\n', 0, max_len)
+        # Если нет - по точкам
+        if split_pos == -1:
+            split_pos = text.rfind('. ', 0, max_len)
+        # Если все еще нет - просто по max_len
+        if split_pos == -1:
+            split_pos = max_len
+        
+        part = text[:split_pos].strip()
+        if part:
+            parts.append(part)
+        text = text[split_pos:].strip()
+    
+    return parts
 
-    for dct in all_spot:
-        if data != dct['meteo']['date']:
-            data = dct['meteo']['date']
-            str_post += f'\n--- <b>{amdate(data)}</b> ---\n\n'
-        str_post += f'<u><b>{dct["meteo"]["city"]}</b></u>\n'
-        str_post += meteo(dct, spots)
+def meteo_message(all_spot: Union[Dict, List], spots: List[Dict], d: List[str]) -> List[str]:
+    """Генерирует прогноз погоды с автоматическим разделением"""
+    try:
+        messages = []
+        current_message = ""
+        current_date = None
 
-    return str_post
+        if isinstance(all_spot, dict):
+            message = amdate(d[0]) if len(d) == 1 else 'В ближайшие 5 дней'
+            content = f'\n--- <b>{message}</b> ---\n\n'
+            content += '<u><b>Летная погода не найдена</b></u> &#128530;\n\n'
+            content += f'{easy_meteo(all_spot["time"])}'
+            return split_long_text(content)
+
+        for dct in all_spot:
+            section = ""
+            if current_date is None or dct['meteo']['date'] != current_date:
+                current_date = dct['meteo']['date']
+                section = f'\n--- <b>{amdate(current_date)}</b> ---\n\n'
+            
+            section += f'<u><b>{dct["meteo"]["city"]}</b></u>\n'
+            section += meteo(dct, spots)
+            
+            if len(current_message) + len(section) > 3500:
+                messages.append(current_message)
+                current_message = section
+            else:
+                current_message += section
+        
+        if current_message:
+            messages.append(current_message)
+        
+        return messages if messages else ["Нет данных для отображения"]
+
+    except Exception as e:
+        logger.error(f"Error in meteo_message: {e}")
+        return [f"Ошибка формирования отчета: {e}"]
 
 
 def meteo(a, spots):
@@ -113,7 +181,8 @@ def easy_meteo(a):
     table_meteo = create_table(lst_header, fly_meteo)
     return (f'&#127777;  {int(middle_temp(a))}\n'
             f'&#127782;  {ampop(a)}\n'
-            f'<pre>{table_meteo}</pre>\n')
+            f'<pre>{table_meteo}</pre>\n'
+            f'<a href="https://www.windy.com/">Подробнее на Windy</a>\n')
 
 
 def get_lst_spots_from_txt(message):
