@@ -54,8 +54,14 @@ source ~/parabot_venv/bin/activate
 ```
 
 ## Cloning a repository
+Клонирование оригенала
 ```commandline
 git clone https://github.com/YaraKoba/ParaBot.git
+cd ParaBot
+```
+Или клонирование измененного бота
+```commandline
+git clone https://github.com/wolfsSG/ParaBot
 cd ParaBot
 ```
 
