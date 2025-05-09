@@ -84,8 +84,27 @@ When initializing the database, you will need to specify localhost:5432 in the D
 
 ## install requirements
 ```commandline
-@@ -112,3 +166,79 @@ DB_PASS = postgreSQL password
-make run_bot
+make requirements
+```
+
+## Run migrations
+```commandline
+make migrate
+```
+
+## Run create superuser
+```commandline
+make createsuperuser
+```
+
+## Run server
+```commandline
+make runserver
+```
+
+## Create .env and check set up
+```commandline
+make env_bot
 ```
 
 ## Creating systemd units
