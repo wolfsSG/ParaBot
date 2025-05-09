@@ -107,7 +107,7 @@ make runserver
 make env_bot
 ```
 fill out .env and setup.py
-
+```commandline
 TOKEN = your telegram token
 API_KEY = your key for https://openweathermap.org/api
 ADMIN_LOGIN = your Django admin login (ранее запускали make createsuperuser)
@@ -116,6 +116,7 @@ DB_HOST = postgreSQL host (localhost:5432)
 DB_NAME = postgreSQL db name
 DB_USER = postgreSQL user
 DB_PASS = postgreSQL password
+```
 
 ## Creating systemd units
 Let's create two separate units - for the bot and the Django server.
