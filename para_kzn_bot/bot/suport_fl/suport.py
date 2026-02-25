@@ -3,13 +3,44 @@ from statistics import mean
 
 import prettytable as pt
 import re
-from typing import List
+from typing import List, Optional
 
 
-def build_user_info(message, update=None):
+def build_user_info(message, cities: Optional[List] = None, update=None):
+    """
+    Создает словарь с информацией о пользователе
+    cities - список городов из API для выбора правильного ID
+    update - словарь с полями для обновления
+    """
+    # По умолчанию используем ID=1
+    city_id = 1
+    city_name = "Kazan"
+    
+    # Если передан список городов, выбираем правильный
+    if cities and isinstance(cities, list) and len(cities) > 0:
+        # Ищем город с ID=1
+        for city in cities:
+            if city.get('id') == 1:
+                city_id = city['id']
+                city_name = city['name']
+                break
+        else:
+            # Если нет ID=1, берем первый город
+            city_id = cities[0].get('id', 1)
+            city_name = cities[0].get('name', 'Kazan')
+    
+    # Если есть update с city, используем его
+    if update and 'city' in update:
+        city_id = update['city']
+        if cities:
+            for city in cities:
+                if city.get('id') == city_id:
+                    city_name = city['name']
+                    break
+    
     user_inf_by_put_or_post = {
         'user_id': message.id,
-        'city_name': 'Kazan',
+        'city_name': city_name,
         'username': message.username,
         'first_name': message.first_name,
         'last_name': message.last_name,
@@ -19,31 +50,31 @@ def build_user_info(message, update=None):
         'is_admin': False,
         'is_moderator': False,
         'get_remainder': True,
-        'city': 1
+        'city': city_id
     }
 
     if update is not None:
-        for up in update:
-            user_inf_by_put_or_post[up] = update[up]
+        for key, value in update.items():
+            user_inf_by_put_or_post[key] = value
 
     return user_inf_by_put_or_post
 
 def build_spot_info(message, file=None):
-
     spot_inf = {
         "city_name": "",
         "name": "",
         "description": "",
         "url_map": "",
         "url_forecast": "",
-        "lat": null,
-        "lon": null,
-        "wind_degree_l": null,
-        "wind_degree_r": null,
-        "wind_min": null,
-        "wind_max": null,
-        "city": null
+        "lat": None,
+        "lon": None,
+        "wind_degree_l": None,
+        "wind_degree_r": None,
+        "wind_min": None,
+        "wind_max": None,
+        "city": None
     }
+    return spot_inf
 
 
 def create_table(header: list, body: List[dict], point=None):

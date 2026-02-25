@@ -14,7 +14,8 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
-from django.urls import path, include, re_path
+from django.urls import path, include
+from django.http import HttpResponseRedirect
 from rest_framework.routers import DefaultRouter
 
 from my_telebot.views import SpotsView, UserView, CityView
@@ -23,12 +24,13 @@ router = DefaultRouter()
 router.register(r'users', UserView, basename='user')
 router.register(r'city', CityView, basename='city')
 
+def redirect_to_admin(request):
+    """Перенаправляет с корневого URL на админку"""
+    return HttpResponseRedirect('/admin/')
+
 urlpatterns = [
+    path('', redirect_to_admin),  # Корневой URL перенаправляет на /admin/
     path('admin/', admin.site.urls),
     path('api/spots/', SpotsView.as_view(), name='spots_list'),
     path('api/', include(router.urls)),
-    # path(r'api/auth/', include('djoser.urls')),
-    # re_path(r'^auth/', include('djoser.urls.authtoken')),
 ]
-
-# urlpatterns += router.urls

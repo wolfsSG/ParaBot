@@ -62,7 +62,8 @@ def analytics_data_point(o_d_p, sun_up, sun_down, meteo_one_days):
         point_fly_time = int(len([t_h for t_h in sort_hours if t_h['wdg'] > 0
                                   and t_h['w_s'] > 0]) / len(sort_hours) * 100)
         if point_fly_time != 0:
-            point_ws_wdg = int(sum([(point['w_s'] + point['wdg']) for point in sort_hours]) / len(sort_hours) * 100)
+            fly_hours = [t_h for t_h in sort_hours if t_h['wdg'] > 0 and t_h['w_s'] > 0]
+            point_ws_wdg = int(sum([(point['w_s'] + point['wdg']) for point in fly_hours]) / len(fly_hours) * 100)
         else:
             point_ws_wdg = 0
     except ZeroDivisionError:
@@ -82,8 +83,16 @@ def get_point(m_t, spot, spots):
     wdg_r = int(spots['wind_degree_r'])
     w_min = int(spots['wind_min'])
     w_max = int(spots['wind_max'])
+    
+    # Получаем тип полетов (по умолчанию free)
+    flight_type = spots.get('flight_type', 'free')
+    
     point_dict = {'time': m_t['time'], 'wdg': 0, 'w_s': 0, 'win_dg': wdg, 'win_l': wdg_l, 'win_r': wdg_r}
+    
+    # Базовые погодные условия
     if pop < 0.6 and rain < 0.6 and w_g < 10 and (w_g - w_s) < 7:
+        
+        # Оценка направления ветра (для всех типов полетов!)
         if wdg_l < wdg_r:
             if wdg_l + middle(wdg_l, wdg_r) - 5 <= wdg <= wdg_r - middle(wdg_l, wdg_r) + 5:
                 point_dict['wdg'] += 0.25
@@ -94,10 +103,24 @@ def get_point(m_t, spot, spots):
                 point_dict['wdg'] += 0.25
             if wdg_l <= wdg or wdg_r >= wdg:
                 point_dict['wdg'] += 0.25
-        if w_min + middle(w_min, w_max) <= w_g <= w_min + middle(w_min, w_max) + 2:
-            point_dict['w_s'] += 0.25
-        if w_min < w_g <= w_max:
-            point_dict['w_s'] += 0.25
+        
+        # Оценка силы ветра в зависимости от типа полетов
+        if flight_type == 'motor':
+            # Для моторных - идеальный ветер 0 м/с
+            if w_s == 0:
+                point_dict['w_s'] = 0.5
+            elif w_s <= 3:  # слабый ветер до 3 м/с
+                # Чем меньше ветер, тем лучше
+                point_dict['w_s'] = 0.5 * (1 - (w_s / 3))
+            else:
+                point_dict['w_s'] = 0
+        else:
+            # Для свободных - старая логика
+            if w_min + middle(w_min, w_max) <= w_g <= w_min + middle(w_min, w_max) + 2:
+                point_dict['w_s'] += 0.25
+            if w_min < w_g <= w_max:
+                point_dict['w_s'] += 0.25
+                
     return point_dict
 
 
@@ -119,10 +142,4 @@ def mid_wdg_h(lef, w, r):
 
 
 if __name__ == '__main__':
-    # pass
-    for i in analytics_main(['2022-11-22', '2022-11-23', '2022-11-24', '2022-11-25']):
-        # print(f't_p - {i["time_point"]}, w_p - {i["wind_point"]} ' + i['meteo']['city'], i['fly_time'])
-        print(i)
-    # print(analytics_main(['2022-11-20']))
-    # spot_dict = get_weather('spot_weather.json')
-    # print(add_point_to_spot(oneday_meteo('2022-11-22', spot_dict['Монастырь'], 'Монастырь')))
+    pass

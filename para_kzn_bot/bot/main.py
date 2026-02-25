@@ -2,9 +2,9 @@
 from suport_fl import mess, button, suport
 from dotenv import load_dotenv
 import os
-
 import logging
 from aiogram import Bot, Dispatcher, types, executor
+from aiogram.utils.exceptions import MessageIsTooLong
 from db.manager import ManagerDjango
 
 logging.basicConfig(level=logging.DEBUG)
@@ -15,23 +15,42 @@ bot = Bot(token=TOKEN)
 dip = Dispatcher(bot=bot)
 manager = ManagerDjango(bot)
 
+async def safe_send_message(chat_id, text, parse_mode='HTML', reply_markup=None):
+    if not text:
+        return
+        
+    if isinstance(text, list):  # Если пришел уже разделенный список
+        messages = text
+    else:
+        messages = [text[i:i+4000] for i in range(0, len(text), 4000)]
+    
+    for i, msg in enumerate(messages):
+        try:
+            await bot.send_message(
+                chat_id,
+                msg,
+                parse_mode=parse_mode,
+                reply_markup=reply_markup if i == 0 else None,
+                disable_web_page_preview=True
+            )
+        except Exception as e:
+            logging.error(f"Ошибка отправки: {e}")
+            continue
 
 @dip.message_handler(commands='start')
 async def start_help(message: types.Message):
     print(f'{message.from_user.first_name} - command: {message.text}')
     mes = mess.header_mess(message)
     print(await manager.create_user(message))
-    await message.answer(mes, parse_mode='html')
+    await safe_send_message(message.chat.id, mes, parse_mode='html')
     await change_city(message)
     await show_days(message)
-
 
 @dip.message_handler(commands='help')
 async def get_help(message: types.Message):
     print(f'{message.from_user.first_name} - command: {message.text}')
     mes = mess.help_mess()
-    await message.answer(mes, parse_mode='html')
-
+    await safe_send_message(message.chat.id, mes, parse_mode='html')
 
 @dip.message_handler(commands=['days'])
 async def show_days(message: types.Message):
@@ -39,15 +58,21 @@ async def show_days(message: types.Message):
     markup = button.day_btn()
     await message.answer("Даты обновлены", parse_mode='html', reply_markup=markup)
 
-
 @dip.message_handler(regexp=r'Все летные дни!')
 async def all_date_fly(message: types.Message):
     print(f'{message.from_user.first_name} - command: {message.text}')
     date_all = button.day_5()
     user_inf, spots = await manager.get_user_and_spots(message)
-    res = await manager.create_meteo_message(city=user_inf['city'], chat_id=user_inf['user_id'], lst_days=date_all)
-    await message.answer(res, parse_mode='html')
-
+    messages = await manager.create_meteo_message(city=user_inf['city'], chat_id=user_inf['user_id'], lst_days=date_all)
+    
+    for i, msg in enumerate(messages):
+        await bot.send_message(
+            message.chat.id,
+            msg,
+            parse_mode='html',
+            reply_markup=button.day_btn() if i == 0 else None,
+            disable_web_page_preview=True
+        )
 
 @dip.message_handler(regexp=r"[А-Я][а-я]\s\d{2}\s[а-я]+\b")
 async def one_day_fly(message: types.Message):
@@ -56,10 +81,9 @@ async def one_day_fly(message: types.Message):
         date_f = [suport.re_amdate(message.text)]
         user_inf, spots = await manager.get_user_and_spots(message)
         res = await manager.create_meteo_message(city=user_inf['city'], chat_id=user_inf['user_id'], lst_days=date_f)
-        await message.answer(res, parse_mode='html')
+        await safe_send_message(message.chat.id, res, parse_mode='html')
     except (IndexError, Exception):
         await show_days(message)
-
 
 @dip.message_handler(commands=['go', 'stop'])
 async def go_start_reminder(message: types.Message):
@@ -73,7 +97,6 @@ async def go_start_reminder(message: types.Message):
         await manager.update_user(message, update_inf)
         await message.answer('Теперь вы НЕ будете получать уведомления')
 
-
 @dip.message_handler(commands=['city'])
 async def change_city(message: types.Message):
     cities = await manager.get_all_city()
@@ -81,14 +104,12 @@ async def change_city(message: types.Message):
     user_inf, _ = await manager.get_user_and_spots(message)
     await message.answer(f'Текущее место: {user_inf["city_name"]}', reply_markup=btn_cities)
 
-
 @dip.message_handler(commands=['get_spot'])
 async def get_spot(message: types.Message):
     print(f'{message.from_user.first_name} - command: {message.text}')
     user, spots = await manager.get_user_and_spots(message)
     markup = button.spots_btn(spots)
     await message.answer(f'Все добавленные горки города {user["city_name"]}', reply_markup=markup)
-
 
 @dip.callback_query_handler(lambda c: c.data)
 async def process_callback_handler(callback_query: types.CallbackQuery):
@@ -100,17 +121,15 @@ async def process_callback_handler(callback_query: types.CallbackQuery):
 
     if spot_dict is not None:
         res = mess.mess_get_spot(spot_dict)
-        await bot.send_message(user['user_id'], text=res, parse_mode='html')
+        await safe_send_message(user['user_id'], text=res, parse_mode='html')
     else:
         city_inf = callback_query.data.split()
         update_inf = {'city': city_inf[0], 'city_name': city_inf[1]}
         await manager.update_user(callback_query, update_inf)
         await bot.send_message(user['user_id'], text=f"Текущее место изменено на: {city_inf[1]}")
 
-
 def ran_server():
     executor.start_polling(dip)
-
 
 if __name__ == '__main__':
     ran_server()

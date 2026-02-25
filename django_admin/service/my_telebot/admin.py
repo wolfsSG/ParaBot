@@ -4,7 +4,20 @@ from my_telebot.models import User, Cities, Spots
 # Register your models here.
 
 class SpotsAdmin(admin.ModelAdmin):
-    list_display = ('name', 'city')
+    list_display = ('name', 'city', 'flight_type', 'wind_min', 'wind_max')
+    list_filter = ('city', 'flight_type')
+    search_fields = ('name', 'description')
+    fieldsets = (
+        ('Основная информация', {
+            'fields': ('city', 'name', 'description', 'flight_type')
+        }),
+        ('Координаты и ссылки', {
+            'fields': ('lat', 'lon', 'url_map', 'url_forecast')
+        }),
+        ('Параметры ветра', {
+            'fields': ('wind_degree_l', 'wind_degree_r', 'wind_min', 'wind_max')
+        }),
+    )
 
 
 class CitiesAdmin(admin.ModelAdmin):

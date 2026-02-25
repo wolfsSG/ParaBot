@@ -35,6 +35,11 @@ class User(models.Model):
 
 
 class Spots(models.Model):
+    FLIGHT_TYPE_CHOICES = [
+        ('free', 'Свободные полеты'),
+        ('motor', 'Моторные полеты'),
+    ]
+    
     city = models.ForeignKey(Cities, related_name='spots', on_delete=models.CASCADE)
     name = models.CharField(max_length=32, null=False, blank=False, unique=True)
     description = models.TextField(max_length=512, null=True, blank=True)
@@ -48,6 +53,14 @@ class Spots(models.Model):
     wind_degree_r = models.FloatField()
     wind_min = models.FloatField()
     wind_max = models.FloatField()
+    
+    # НОВОЕ ПОЛЕ: тип полетов
+    flight_type = models.CharField(
+        max_length=10,
+        choices=FLIGHT_TYPE_CHOICES,
+        default='free',
+        verbose_name='Тип полетов'
+    )
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

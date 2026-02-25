@@ -26,7 +26,7 @@ SECRET_KEY = 'django-insecure-35+9r=a@5gopy&z%^r%pbay608olc_ly!(*d1w(m2v3$ybecdp
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['parabot.nakolenke.org', '127.0.0.1', '172.16.22.3', 'localhost']
+ALLOWED_HOSTS = ['nakolenke.ru', '127.0.0.1', 'localhost']
 
 
 # Application definition
@@ -139,8 +139,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 STATIC_ROOT = os.path.join(BASE_DIR, 'static/')
 
-CSRF_TRUSTED_ORIGINS = ['https://*.nakolenke.org', 'https://parabot.nakolenke.org', 'parabot.nakolenke.org']
-
+CSRF_TRUSTED_ORIGINS = ['https://*.luchshev42.ru', 'https://parabot.luchshev42.ru', 'parabot.luchshev42.ru']
 
 # REST_FRAMEWORK = {
 #     'DEFAULT_AUTHENTICATION_CLASSES': (
@@ -149,3 +148,4 @@ CSRF_TRUSTED_ORIGINS = ['https://*.nakolenke.org', 'https://parabot.nakolenke.or
 #         'rest_framework.authentication.SessionAuthentication',
 #     ),
 # }
+

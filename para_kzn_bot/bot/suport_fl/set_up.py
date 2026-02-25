@@ -1,4 +1,4 @@
-LOCAL_HOST = "http://127.0.0.1:8000/"
+LOCAL_HOST = "http://127.0.0.1:8000"
 USER_PATH = "/api/users/"
 SPOTS_PATH = "/api/spots/"
 CITY_PATH = "/api/city/"

@@ -22,3 +22,14 @@ django_admin/.idea/
 # Dependency directories
 django_admin/venv/
 django_admin/env/
+# Python cache files
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+
+# Logs and backups
+*.log
+backups/
+cron.log
