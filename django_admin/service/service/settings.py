@@ -139,7 +139,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 STATIC_ROOT = os.path.join(BASE_DIR, 'static/')
 
-CSRF_TRUSTED_ORIGINS = ['https://*.luchshev42.ru', 'https://parabot.luchshev42.ru', 'parabot.luchshev42.ru']
+CSRF_TRUSTED_ORIGINS = ['https://*.nakolenke.ru', 'https://parabot.nakolenke.ru', 'parabot.nakolenke.ru']
 
 # REST_FRAMEWORK = {
 #     'DEFAULT_AUTHENTICATION_CLASSES': (
